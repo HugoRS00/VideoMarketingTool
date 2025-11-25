@@ -89,6 +89,14 @@ async def generate_video_endpoint(request: VideoRequest):
 def health_check():
     return {"status": "healthy", "persona": "Kai"}
 
+@app.get("/")
+def root():
+    return {
+        "message": "Welcome to TradingWizard AI - Viral Video Engine",
+        "docs": "/docs",
+        "health": "/health"
+    }
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8000))
