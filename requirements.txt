@@ -1,0 +1,10 @@
+openai
+google-cloud-aiplatform
+replicate
+moviepy
+fastapi
+uvicorn
+python-dotenv
+pytrends
+requests
+uvicorn[standard]
