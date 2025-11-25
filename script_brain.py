@@ -66,19 +66,25 @@ class ScriptBrain:
         system_prompt = self._get_system_prompt(mode)
         
         try:
+            print(f"Calling OpenAI API with model: {self.model}")
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Generate a viral video script about: {topic}"}
                 ],
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
+                timeout=30.0  # 30 second timeout
             )
             
             content = response.choices[0].message.content
+            print(f"OpenAI response received: {len(content)} characters")
             return json.loads(content)
+        except TimeoutError as e:
+            print(f"Timeout error: OpenAI API took too long to respond: {e}")
+            return None
         except Exception as e:
-            print(f"Error generating script: {e}")
+            print(f"Error generating script: {type(e).__name__}: {e}")
             return None
 
 if __name__ == "__main__":
