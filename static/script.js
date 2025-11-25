@@ -25,10 +25,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 3. Generate Button Logic
+    // Elements
+    const scriptReviewPanel = document.getElementById('scriptReviewPanel');
+    const controlsPanel = document.querySelector('.controls-panel');
+    const scriptTextarea = document.getElementById('scriptTextarea');
+    const approveBtn = document.getElementById('approveBtn');
+    const backBtn = document.getElementById('backBtn');
+
+    // State
+    let currentScriptData = null;
+
+    // 3. Generate Script Logic
     generateBtn.addEventListener('click', async () => {
         const topic = topicInput.value.trim();
-        const modelTier = document.querySelector('input[name="model"]:checked').value;
 
         if (!topic) {
             log('> Error: No topic provided.', 'error');
@@ -36,26 +45,69 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Reset UI
-        resultContainer.classList.add('hidden');
+        // UI State: Generating Script
         generateBtn.disabled = true;
-        generateBtn.querySelector('.btn-text').textContent = "GENERATING...";
+        generateBtn.querySelector('.btn-text').textContent = "WRITING SCRIPT...";
 
-        // Start Process
-        log(`> Initializing generation job...`, 'system');
+        log(`> Initializing script generation...`, 'system');
         log(`> Topic: "${topic}"`, 'info');
-        log(`> Mode: ${selectedMode} | Model: ${modelTier}`, 'info');
 
         try {
-            // Simulate steps for better UX (since backend is synchronous for now)
-            // In a real async backend, we'd poll status.
-
-            log('> Step 1: Brainstorming script (GPT-5.1)...', 'system');
-
-            const response = await fetch('/generate_video', {
+            const response = await fetch('/generate_script', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    topic: topic,
+                    content_mode: selectedMode
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.detail || 'Script generation failed');
+            }
+
+            const data = await response.json();
+            currentScriptData = data;
+
+            // Show Review Panel
+            log('> Script generated! Please review.', 'success');
+            scriptTextarea.value = data.script;
+
+            controlsPanel.style.display = 'none';
+            scriptReviewPanel.style.display = 'flex';
+
+        } catch (error) {
+            log(`> Error: ${error.message}`, 'error');
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.querySelector('.btn-text').textContent = "GENERATE SCRIPT";
+        }
+    });
+
+    // 4. Approve & Generate Video Logic
+    approveBtn.addEventListener('click', async () => {
+        const scriptText = scriptTextarea.value;
+        const modelTier = document.querySelector('input[name="model"]:checked').value;
+        const topic = topicInput.value.trim();
+
+        if (!scriptText) return;
+
+        // UI State: Generating Video
+        approveBtn.disabled = true;
+        approveBtn.textContent = "PRODUCING VIDEO...";
+        resultContainer.classList.add('hidden');
+
+        log('> Script approved. Starting production...', 'system');
+        log(`> Model: ${modelTier}`, 'info');
+
+        try {
+            const response = await fetch('/generate_video_from_script', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    script: scriptText,
+                    visual_prompts: currentScriptData.visual_prompts,
                     topic: topic,
                     model_tier: modelTier,
                     content_mode: selectedMode
@@ -64,26 +116,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) {
                 const err = await response.json();
-                throw new Error(err.detail || 'Generation failed');
+                throw new Error(err.detail || 'Video generation failed');
             }
 
             const data = await response.json();
 
-            log('> Step 2: Script generated successfully.', 'success');
-            log('> Step 3: Generating video assets (Vision Engine)...', 'system');
-            log('> Step 4: Synthesizing audio (ElevenLabs/TTS)...', 'system');
-            log('> Step 5: Assembling final cut with MoviePy...', 'system');
-
-            // Success
+            log('> Video assets generated.', 'success');
+            log('> Audio synthesized.', 'success');
+            log('> Final cut assembled.', 'success');
             log('> GENERATION COMPLETE.', 'success');
 
             // Show Result
-            // Note: data.video_path is a local path. We need to make sure backend serves it.
-            // For now, we assume backend returns a relative path we can serve via static or a specific route.
-            // Since our backend saves to 'output/', we need to expose 'output/' as static or stream it.
-            // Let's assume we fix backend to serve 'output' directory.
-
-            // Fix path for browser (assuming output dir is mounted)
             const filename = data.video_path.split('/').pop();
             const videoUrl = `/output/${filename}`;
 
@@ -91,12 +134,22 @@ document.addEventListener('DOMContentLoaded', () => {
             downloadLink.href = videoUrl;
             resultContainer.classList.remove('hidden');
 
+            // Reset View
+            scriptReviewPanel.style.display = 'none';
+            controlsPanel.style.display = 'flex';
+
         } catch (error) {
             log(`> FATAL ERROR: ${error.message}`, 'error');
         } finally {
-            generateBtn.disabled = false;
-            generateBtn.querySelector('.btn-text').textContent = "GENERATE ASSET";
+            approveBtn.disabled = false;
+            approveBtn.textContent = "APPROVE & GENERATE VIDEO";
         }
+    });
+
+    // Back Button
+    backBtn.addEventListener('click', () => {
+        scriptReviewPanel.style.display = 'none';
+        controlsPanel.style.display = 'flex';
     });
 
     // Helper: Fetch Trends

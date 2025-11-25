@@ -87,9 +87,23 @@
                 </div>
 
                 <button id="generateBtn" class="cta-button">
-                    <span class="btn-text">GENERATE ASSET</span>
+                    <span class="btn-text">GENERATE SCRIPT</span>
                     <span class="btn-glitch"></span>
                 </button>
+            </section>
+
+            <!-- Script Review Panel (Hidden by default) -->
+            <section id="scriptReviewPanel" class="controls-panel hidden" style="display: none;">
+                <div class="card">
+                    <h2>Review Script</h2>
+                    <p class="label">Edit the script if needed before generating video.</p>
+                    <textarea id="scriptTextarea" rows="10"
+                        style="width: 100%; background: #000; color: #fff; border: 1px solid #333; padding: 10px; border-radius: 8px; font-family: monospace;"></textarea>
+                    <div style="margin-top: 10px; display: flex; gap: 10px;">
+                        <button id="approveBtn" class="cta-button" style="flex: 1;">APPROVE & GENERATE VIDEO</button>
+                        <button id="backBtn" class="secondary-button">Back</button>
+                    </div>
+                </div>
             </section>
 
             <!-- Right Panel: Output -->

@@ -12,25 +12,37 @@ brain = ScriptBrain()
 vision = VideoProvider()
 editor = VideoEditor()
 
-class VideoRequest(BaseModel):
+class ScriptRequest(BaseModel):
     topic: str
-    model_tier: str = "budget" # "budget", "sora-2", "veo"
-    content_mode: str = "MEME" # "MEME", "INFORMAL", "EDUCATIONAL", "NEWS"
+    content_mode: str = "MEME"
 
-@app.post("/generate_video")
-async def generate_video_endpoint(request: VideoRequest):
+class VideoFromScriptRequest(BaseModel):
+    script: str
+    visual_prompts: list[str]
+    topic: str
+    model_tier: str = "budget"
+    content_mode: str = "MEME"
+
+@app.post("/generate_script")
+async def generate_script_endpoint(request: ScriptRequest):
     try:
-        # 1. Generate Script
         print(f"Step 1: Generating Script for '{request.topic}' in mode '{request.content_mode}'")
         script_data = brain.generate_script(request.topic, request.content_mode)
         if not script_data:
             raise HTTPException(status_code=500, detail="Failed to generate script")
         
-        script_text = script_data.get("script", "")
-        visual_prompts = script_data.get("visual_prompts", [])
+        return script_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/generate_video_from_script")
+async def generate_video_from_script_endpoint(request: VideoFromScriptRequest):
+    try:
+        script_text = request.script
+        visual_prompts = request.visual_prompts
         
         if not script_text:
-             raise HTTPException(status_code=500, detail="Empty script generated")
+             raise HTTPException(status_code=400, detail="Empty script provided")
 
         # 2. Generate Video (Multi-Scene)
         print(f"Step 2: Generating Videos for {len(visual_prompts)} scenes")
@@ -78,9 +90,9 @@ async def generate_video_endpoint(request: VideoRequest):
         
         if valid_videos:
              final_output = editor.assemble_video(valid_videos, audio_path, script_text, f"viral_{request.content_mode}_{request.topic.replace(' ', '_')}.mp4")
-             return {"status": "success", "video_path": final_output, "script": script_text}
+             return {"status": "success", "video_path": final_output}
         else:
-             return {"status": "partial_success", "message": "Video generation failed (no local files), but script and audio created.", "script": script_text, "audio_path": audio_path, "video_urls": [video_url]}
+             return {"status": "partial_success", "message": "Video generation failed (no local files), but script and audio created.", "audio_path": audio_path}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
