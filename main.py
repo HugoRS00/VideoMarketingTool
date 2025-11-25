@@ -85,17 +85,28 @@ async def generate_video_endpoint(request: VideoRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/health")
-def health_check():
-    return {"status": "healthy", "persona": "Kai"}
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from trends import TrendSpotter
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/output", StaticFiles(directory="output"), name="output")
+
+# Initialize Trend Spotter
+spotter = TrendSpotter()
+
+@app.get("/trends")
+def get_trends():
+    return spotter.fetch_trending_topics()
 
 @app.get("/")
 def root():
-    return {
-        "message": "Welcome to TradingWizard AI - Viral Video Engine",
-        "docs": "/docs",
-        "health": "/health"
-    }
+    return FileResponse("static/index.html")
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "persona": "Kai"}
 
 if __name__ == "__main__":
     import uvicorn

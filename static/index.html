@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingWizard AI - Viral Engine</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <span class="icon">⚡</span>
+                <h1>TradingWizard <span class="highlight">AI</span></h1>
+            </div>
+            <div class="status-indicator">
+                <span class="dot online"></span> System Online
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <main>
+            <!-- Left Panel: Controls -->
+            <section class="controls-panel">
+                <div class="card">
+                    <h2>1. Choose Topic</h2>
+                    <div class="input-group">
+                        <input type="text" id="topicInput" placeholder="e.g. Bitcoin ATH, Nvidia Earnings...">
+                    </div>
+                    <div class="trends-wrapper">
+                        <span class="label">Trending Now:</span>
+                        <div id="trendChips" class="chips-container">
+                            <!-- Chips injected via JS -->
+                            <span class="chip skeleton">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>2. Select Mode</h2>
+                    <div class="mode-grid">
+                        <div class="mode-card active" data-mode="MEME">
+                            <div class="mode-icon">🤡</div>
+                            <h3>Meme</h3>
+                            <p>Chaos & Virality</p>
+                        </div>
+                        <div class="mode-card" data-mode="NEWS">
+                            <div class="mode-icon">📰</div>
+                            <h3>News</h3>
+                            <p>Fast & Cynical</p>
+                        </div>
+                        <div class="mode-card" data-mode="EDUCATIONAL">
+                            <div class="mode-icon">🧠</div>
+                            <h3>Alpha</h3>
+                            <p>High Value</p>
+                        </div>
+                        <div class="mode-card" data-mode="INFORMAL">
+                            <div class="mode-icon">☕</div>
+                            <h3>Vibe</h3>
+                            <p>Relatable</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>3. Model Tier</h2>
+                    <div class="toggle-group">
+                        <label class="toggle-option active">
+                            <input type="radio" name="model" value="budget" checked>
+                            <span>Budget (Fast)</span>
+                        </label>
+                        <label class="toggle-option">
+                            <input type="radio" name="model" value="sora-2">
+                            <span>High-End (Sora 2)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="generateBtn" class="cta-button">
+                    <span class="btn-text">GENERATE ASSET</span>
+                    <span class="btn-glitch"></span>
+                </button>
+            </section>
+
+            <!-- Right Panel: Output -->
+            <section class="output-panel">
+                <!-- Terminal View -->
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="title">kai_brain.exe</span>
+                    </div>
+                    <div id="terminalOutput" class="terminal-body">
+                        <div class="log-line system">> Initializing TradingWizard AI...</div>
+                        <div class="log-line system">> Waiting for input...</div>
+                    </div>
+                </div>
+
+                <!-- Result View -->
+                <div id="resultContainer" class="result-container hidden">
+                    <h2>Generated Asset</h2>
+                    <div class="video-wrapper">
+                        <video id="finalVideo" controls loop>
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="actions">
+                        <a id="downloadLink" href="#" class="secondary-button" download>Download Video</a>
+                        <button id="copyScriptBtn" class="secondary-button">Copy Script</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
