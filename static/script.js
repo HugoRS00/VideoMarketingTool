@@ -159,13 +159,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const trends = await res.json();
 
             trendChips.innerHTML = '';
-            trends.forEach(trend => {
+
+            // Take top trends (limit to avoid UI clutter)
+            const topTrends = trends.slice(0, 15);
+
+            topTrends.forEach(trend => {
+                // Handle both old format (string) and new format (object)
+                const topicText = typeof trend === 'string' ? trend : trend.topic;
+                const category = trend.category || '';
+
                 const chip = document.createElement('span');
                 chip.className = 'chip';
-                chip.textContent = trend;
+
+                // Add category class for styling
+                if (category === 'meme' || category === 'story') {
+                    chip.classList.add('chip-meme');
+                } else if (category === 'education') {
+                    chip.classList.add('chip-education');
+                }
+
+                chip.textContent = topicText;
                 chip.addEventListener('click', () => {
-                    topicInput.value = trend;
-                    log(`> Topic set to trending: ${trend}`, 'info');
+                    topicInput.value = topicText;
+                    log(`> Topic set to trending: ${topicText}`, 'info');
                 });
                 trendChips.appendChild(chip);
             });
