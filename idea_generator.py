@@ -47,13 +47,25 @@ class FinanceIdeaGenerator:
         print("\n🎬 Creating video prompts...")
         video_topics = self._select_topics_for_videos(topics, video_count)
         
-        for i, topic_data in enumerate(video_topics, 1):
+        # Reserve some slots for Kai Zen prompts (approx 20%)
+        kai_count = max(1, int(video_count * 0.2))
+        standard_count = video_count - kai_count
+        
+        # Generate Standard Video Prompts
+        for i, topic_data in enumerate(video_topics[:standard_count], 1):
             topic = topic_data['topic']
             is_meme = topic_data['category'] in ['meme', 'story']
             
             print(f"  [{i}/{video_count}] {topic} {'(MEME)' if is_meme else '(SERIOUS)'}")
             video_prompt = self.prompt_factory.create_video_prompt(topic, is_meme=is_meme)
             all_prompts.append(video_prompt.model_dump())
+            
+        # Generate Kai Zen Prompts
+        for i, topic_data in enumerate(video_topics[standard_count:], 1):
+            topic = topic_data['topic']
+            print(f"  [{standard_count + i}/{video_count}] {topic} (KAI ZEN 🧙‍♂️)")
+            kai_prompt = self.prompt_factory.create_kai_prompt(topic)
+            all_prompts.append(kai_prompt.model_dump())
         
         # Step 4: Generate image prompts (typically more meme-focused)
         print("\n🖼️  Creating image prompts...")

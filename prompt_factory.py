@@ -173,6 +173,66 @@ Return JSON with these exact keys:
         except Exception as e:
             print(f"Error generating image prompt: {e}")
             return self._create_fallback_image(topic, is_meme)
+
+    def create_kai_prompt(self, topic: str) -> VideoPrompt:
+        """Generate a 'Kai Zen' character video prompt"""
+        if not self.client:
+            return self._create_fallback_video(topic, is_meme=True)
+            
+        system_prompt = """You are the creator of 'Kai', the TradingWizard mascot.
+CHARACTER: Kai is a tiny wizard with a floppy hat. He is calm, zen, and magical.
+ACTIVITY: He is often stacking pebbles, meditating, or interacting with trading charts in a peaceful, lofi way.
+VIBE: Lofi beats, slow motion, magical realism, cute but profound, zero emotion/stoic.
+
+EXAMPLES:
+- tiny kai in floppy wizard hat sits by a lake, calmly stacking pebbles into a perfect cairn while the chart behind him prints a 20r green candle in slow motion, soft lofi beats
+- kai levitates a single pebble above his hand, eyes wide, then gently places it on a rock stack as the bitcoin chart hits exact tp, peaceful wind chimes sfx
+- kai blinks slowly at a red candle, tilts his hat, floats one pebble higher, candle instantly flips green, zero emotion
+- kai asleep on a lily pad, hat covering eyes, pebbles auto-stacking themselves around him while +47% pnl floats overhead like fireflies
+
+GOAL: Create a similar video prompt involving Kai and the given finance topic."""
+
+        user_prompt = f"""Generate a Kai Zen video prompt about: {topic}
+
+Return JSON with these exact keys:
+{{
+  "id": "kai-zen-id",
+  "hook": "short zen/lofi hook",
+  "prompt": "full prompt describing tiny kai with floppy hat and pebbles",
+  "cta_overlay": "minimal text or empty"
+}}"""
+
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                response_format={"type": "json_object"},
+                timeout=30.0
+            )
+            
+            data = json.loads(response.choices[0].message.content)
+            
+            return VideoPrompt(
+                id=data.get("id", f"kai-{self._generate_id(topic)}"),
+                type="video",
+                model="video-model",
+                topic=topic,
+                hook=data["hook"],
+                prompt=data["prompt"],
+                duration_seconds=random.randint(8, 15),
+                aspect_ratio="9:16",
+                style_notes="lofi, zen, magical realism, 3d render, cute",
+                cta_overlay=data.get("cta_overlay", ""),
+                language="en"
+            )
+            
+        except Exception as e:
+            print(f"Error generating Kai prompt: {e}")
+            return self._create_fallback_video(topic, is_meme=True)
+
     
     def _generate_id(self, topic: str) -> str:
         """Generate a kebab-case ID from topic"""
