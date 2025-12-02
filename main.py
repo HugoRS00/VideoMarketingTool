@@ -112,13 +112,28 @@ spotter = TrendSpotter()
 def get_trends():
     return spotter.fetch_trending_topics()
 
+@app.get("/generate")
+def autonomous_generate():
+    """
+    Autonomous finance TikTok content generator.
+    Returns pure JSON array of video and image prompts.
+    No user input required - fully automated.
+    """
+    from idea_generator import FinanceIdeaGenerator
+    
+    generator = FinanceIdeaGenerator()
+    ideas = generator.generate_ideas()
+    
+    # Return pure JSON array (no wrapping object)
+    return ideas
+
 @app.get("/")
 def root():
     return FileResponse("static/index.html")
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "persona": "Kai"}
+    return {"status": "healthy", "persona": "Kai", "features": ["autonomous_generation", "video_creation"]}
 
 if __name__ == "__main__":
     import uvicorn
